@@ -1,0 +1,13 @@
+:root {
+    --r-link-color: #a81326;
+    --r-link-color-dark: #8d0e1f;
+    --r-link-color-hover: #8d0e1f;
+  }
+
+.slides {
+    width: 1200px !important;
+}
+.reveal section img {
+    border:0;
+    box-shadow: none;
+}
