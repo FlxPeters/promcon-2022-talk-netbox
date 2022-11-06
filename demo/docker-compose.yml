@@ -1,0 +1,69 @@
+version: "3"
+services:
+  # Prometheus instance
+  prom:
+    image: prom/prometheus
+    ports:
+    - 9090:9090
+    networks:
+    - prometheus
+    volumes:
+      - ./configuration/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+  # Netbox wit required services
+  netbox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: netbox.env
+    ports: 
+    - 8080:8080
+    volumes:
+      - ./configuration/plugins.py:/etc/netbox/config/plugins.py:z,ro
+      - ./initializers:/opt/netbox/initializers:z,ro
+    networks:
+    - prometheus
+    - netbox
+  postgres:
+    image: postgres:14-alpine
+    env_file: postgres.env
+    volumes:
+    - netbox-postgres-data:/var/lib/postgresql/data
+    networks:
+    - netbox
+  redis:
+    image: redis:7-alpine
+    networks:
+    - netbox
+  redis-cache:
+    image: redis:7-alpine
+    networks:
+    - netbox
+
+# Mock containers simulating targets
+  pos-device-01:
+    image: nginx
+    volumes:
+      - ./nginx/metrics:/usr/share/nginx/html/metrics:ro,z
+    networks:
+    - prometheus
+  pos-device-02:
+    image: nginx
+    volumes:
+      - ./nginx/metrics:/usr/share/nginx/html/metrics:ro,z
+    networks:
+    - prometheus
+  pos-device-03:
+    image: nginx
+    volumes:
+      - ./nginx/metrics:/usr/share/nginx/html/metrics:ro,z
+    networks:
+    - prometheus
+
+volumes:
+  netbox-postgres-data:
+    driver: local
+networks:
+  netbox: 
+  prometheus:

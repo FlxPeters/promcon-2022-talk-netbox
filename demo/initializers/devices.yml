@@ -1,0 +1,61 @@
+# Possible Choices:
+#   face:
+#   - front
+#   - rear
+#   status:
+#   - offline
+#   - active
+#   - planned
+#   - staged
+#   - failed
+#   - inventory
+#   - decommissioning
+#
+# Examples:
+
+- name: pos-device-01
+  device_role: Cash desk
+  device_type: POS Device Type
+  site: Store Stuttgart
+  status: active
+  primary_ip4: 192.168.42.10/24
+
+- name: pos-device-02
+  device_role: Cash desk
+  device_type: POS Device Type
+  site: Store Stuttgart
+  status: active
+  primary_ip4: 192.168.42.11/24
+
+- name: pos-device-03
+  device_role: Cash desk
+  device_type: POS Device Type
+  site: Store München
+  status: inventory
+  primary_ip4: 192.168.42.12/24
+
+
+# - name: server02
+#   device_role: server
+#   device_type: Other
+#   site: AMS 2
+#   rack: rack-02
+#   face: front
+#   position: 2
+#   primary_ip4: 10.1.1.2/24
+#   primary_ip6: 2001:db8:a000:1::2/64
+#   custom_field_data:
+#     text_field: Description
+# - name: server03
+#   device_role: server
+#   device_type: Other
+#   site: SING 1
+#   rack: rack-03
+#   face: front
+#   position: 3
+# - name: server04
+#   device_role: server
+#   device_type: Other
+#   site: SING 1
+#   face: front
+#   position: 3

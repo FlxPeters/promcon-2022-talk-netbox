@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: "netbox-demo"
+
+scrape_configs:
+  - job_name: "prometheus"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: "windows_exporter"
+    http_sd_configs:
+      - url: http://netbox:8080/api/plugins/prometheus-sd/devices?status=active
+        refresh_interval: 5s
+        authorization:
+          type: "Token"
+          credentials: "0123456789abcdef0123456789abcdef01234567"
+      
+    # Extract labels from Netbox to Prometheus
+    relabel_configs:
+    - source_labels: [__meta_netbox_site_slug]
+      target_label: site_slug

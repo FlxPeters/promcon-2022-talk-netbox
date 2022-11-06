@@ -1,0 +1,9 @@
+- name: Store Stuttgart
+  slug: store-stgt
+  status: active
+- name: Store Duesseldorf
+  slug: store-due
+  status: active
+- name: Store München
+  slug: store-mue
+  status: active

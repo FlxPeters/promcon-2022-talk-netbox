@@ -1,0 +1,5 @@
+- name: Microsoft
+  slug: microsoft
+
+- name: Hardware Vendor
+  slug: hardware-vendor

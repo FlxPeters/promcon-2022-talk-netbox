@@ -1,0 +1,52 @@
+# Possible Choices:
+#   status:
+#   - active
+#   - reserved
+#   - deprecated
+#   - dhcp
+#   role:
+#   - loopback
+#   - secondary
+#   - anycast
+#   - vip
+#   - vrrp
+#   - hsrp
+#   - glbp
+#   - carp
+#
+# Examples:
+
+- address: 192.168.42.10/24
+  device: pos-device-01
+  interface: eth0
+  status: active
+- address: 192.168.42.11/24
+  device: pos-device-02
+  interface: eth0
+  status: active
+- address: 192.168.42.12/24
+  device: pos-device-03
+  interface: eth0
+  status: active
+
+
+# - address: 2001:db8:a000:1::1/64
+#   device: server01
+#   interface: to-server02
+#   status: active
+# - address: 10.1.1.2/24
+#   device: server02
+#   interface: to-server01
+#   status: active
+# - address: 2001:db8:a000:1::2/64
+#   device: server02
+#   interface: to-server01
+#   status: active
+# - address: 10.1.1.10/24
+#   description: reserved IP
+#   status: reserved
+#   tenant: tenant1
+# - address: 2001:db8:a000:1::10/64
+#   description: reserved IP
+#   status: reserved
+#   tenant: tenant1
