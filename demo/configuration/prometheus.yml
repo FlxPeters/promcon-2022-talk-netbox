@@ -10,6 +10,7 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:9090"]
 
+  # Fetch targets from Netbox
   - job_name: "windows_exporter"
     http_sd_configs:
       - url: http://netbox:8080/api/plugins/prometheus-sd/devices?status=active
@@ -17,7 +18,6 @@ scrape_configs:
         authorization:
           type: "Token"
           credentials: "0123456789abcdef0123456789abcdef01234567"
-      
     # Extract labels from Netbox to Prometheus
     relabel_configs:
     - source_labels: [__meta_netbox_site_slug]

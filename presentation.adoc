@@ -17,9 +17,9 @@ image::https://www.e-breuninger.de/fileadmin/Mediendatenbank/ALTE%20Website_vor%
 * https://de.wikipedia.org/wiki/Breuninger[Breuninger] operates 14 luxury fashion stores in Germany.
 * For 2020 it was announced that there will be a new POS system.
 * The old one was only monitored with ping checks in PRTG.
-* We had the claim to monitor this better
 
-CAUTION: We love Prometheus!
+[CAUTION,step=1]
+**We can do better and we already have Prometheus!**
 
 == POS System Overview
 
@@ -52,9 +52,9 @@ and other peripherals such as card terminals and receipt printers.
 * Windows based desktop systems
 ** _Metrics via https://github.com/prometheus-community/windows_exporter[windows_exporter]_
 * Running Java based POS application
-** _Metrics custom exporter_
+** _Custom exporter on Powershell_
 ** _Planned: https://github.com/prometheus/jmx_exporter[JMX exporter]_
-* Peripherals / Card terminals with IP
+* Peripherals like payment terminals
 ** _Metrics via https://github.com/prometheus/blackbox_exporter[Blackbox Exporter]_
 --
 
@@ -63,7 +63,6 @@ image::https://image.jimcdn.com/app/cms/image/transf/none/path/s7bf4e56cafb0dc16
 
 == Service Discovery
 
-[step=1]
 --
 * There is no API describing the the current known POS devices
 ** _This is the real world - no cloud native features available_
@@ -73,36 +72,41 @@ image::https://image.jimcdn.com/app/cms/image/transf/none/path/s7bf4e56cafb0dc16
 --
 
 [WARNING,step=2]
-How is Prometheus supposed to know which POS systems are currently active? +
+How does Prometheus know which POS systems are currently active? +
 *Excel and manual adjustments in files are not an option!*
 
 
 == Introducing Netbox
 
-image:https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg[width=200]
-
-[.notes]
---
-NetBox is the leading solution for modeling and documenting modern networks.
-By combining the traditional disciplines of IP address management (IPAM) and datacenter infrastructure management (DCIM)
-with powerful APIs and extensions, NetBox provides the ideal "source of truth" to power network automation.
---
+image:https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg[width=150]
 
 --
-* Python based web application for IP address management *(IPAM)* and Datacenter infrastructure management *(DCIM)*. +
-* Also capable of managing non rack *devices* and *virtual machines life cycle*.
-* Has a *REST-API* and supports *Plugins*
+* Python based web application for IP address management *(IPAM)* and Datacenter infrastructure management *(DCIM)*
+* Capable of managing *devices* and *virtual machine's life cycle*.
+* Powerful **APIs** and **extensions**
 --
 
 [CAUTION, step=1]
-Source of truth about all entities - If it has an IP it's in Netbox
+NetBox provides the "source of truth" to power automation
 
 == Connecting Netbox with Prometheus
 
 [WARNING, step=1]
 There is no native integration of Netbox and Prometheus
 
+[step=1]
+__but we have some options...__
+
+
 == `static_config`
+
+[.notes]
+--
+* Classic approach for third party SD
+* Scrape targets periodically and dump them to a file
+--
+
+__The classic approach__
 
 * 👍 Easy to implement as a sidecar
 * 👍 No adjustments on Netbox
@@ -114,11 +118,22 @@ There is no native integration of Netbox and Prometheus
 [step=1]
 https://github.com/FlxPeters/netbox-prometheus-sd
 
-== `http_sd_config`
+== `http_sd`
+
+[.notes]
+--
+* Modern way of integration with third party SD sources
+* Move the knowledge back to the source
+* Just a new view on the Netbox API
+--
+
+__Fetch targets dynamically via HTTP__
 
 https://prometheus.io/docs/prometheus/latest/http_sd/#comparison-between-file-based-sd-and-http-sd[Introduced] in Prometheus 2.28.0 as alternative to `static_config`
 
 * 👍 No sidecar on Prometheus
+* 👍 Full power of the Netbox API (filters etc.)
+* 👍 No replicated filter flags on the sidecar
 * 👍 Less API calls
 
 * 👎 Requires adjustments/plugin on Netbox
@@ -133,7 +148,9 @@ https://github.com/FlxPeters/netbox-plugin-prometheus-sd
 * Netbox and Prometheus are a perfect match for monitoring targets without a cloud native API or inventory
 * Not only useable for POS devices - also for network devices and bare metal infrastructure
 
+== Bonus
+
 TIP: Give the Engineers a reason to document: +
-    _By coupling documentation and monitoring, we always have up-to-date and maintained documentation on the rolled-out status._
+     By coupling documentation and monitoring, we always have up-to-date and maintained documentation of the environment.
 
 == Questions?
