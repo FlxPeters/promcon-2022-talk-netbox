@@ -11,3 +11,8 @@
     border:0;
     box-shadow: none;
 }
+
+section.inverted {
+    background: #a81326;
+    color: #fff
+}

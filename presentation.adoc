@@ -1,12 +1,25 @@
 = Monitoring POS Infrastructure
 with Prometheus and Netbox
 
+[.notes]
+--
+* POS stands for Point of sales or point of contact. 
+* Cash desk infrastructure
+--
+
 :revealjs_theme: white
 :customcss: custom.css
 :revealjs_history: true
 :icons: font
+:revealjs_totalTime: 900
 
 == Felix Peters
+
+[.notes]
+--
+* Internal platform team 
+* Responsible for Linux and cloud base infrastructure 
+--
 
 Engineering Lead - Operations Core Tooling +
 
@@ -14,22 +27,36 @@ image::https://www.e-breuninger.de/fileadmin/Mediendatenbank/ALTE%20Website_vor%
 
 == Starting Point
 
-* https://de.wikipedia.org/wiki/Breuninger[Breuninger] operates 14 luxury fashion stores in Germany.
-* For 2020 it was announced that there will be a new POS system.
-* The old one was only monitored with ping checks in PRTG.
+[.notes]
+--
+* Store in munich since this year
+* There was a demand for more insight about what's going on in the POS system. 
+* Prometheus was the natal choice for us
+* We already hav experience in running it and in writing alerts
+--
+
+* https://de.wikipedia.org/wiki/Breuninger[Breuninger] has multiple luxury fashion stores in Germany
+* For 2020 it was announced that there will be a new POS system
+* The old one was only monitored with ping checks in PRTG
+* My Team should support the project
 
 [CAUTION,step=1]
-**We can do better and we already have Prometheus!**
+**We already have and love Prometheus!**
 
 == POS System Overview
 
 [.notes]
 --
-The new system is build in layers. There is a Linux based cloud instance as centralized backend service.
-It's operated by my team, so it was easy to integrate it with our existing prometheus infrastructure and we won't care too much about it today. 
+* The new system is build in layers. Linux based cloud instance as centralized backend service.
+* Storing all the sales data in a cloud database.
+** Easy to integrate with prometheus (node exporter and cloud based SD)
+** We won't care too much about it today. 
 
-For each store we have a local server backend which replicate data from the stores to the cloud.
-This backend is running on virtualize windows server instances with static ip config. 
+* For each store we have a local server backend (master) which replicate data from the stores to the cloud.
+** This backend is running on virtualize windows server instances with static ip config. 
+* On each cash desk we have have a Windows desktop system running the POS software
+** Sends processed data to the master instance
+** Can have payment terminals and printers
 --
 
 image::images/overview.png[]
@@ -63,6 +90,12 @@ image::https://image.jimcdn.com/app/cms/image/transf/none/path/s7bf4e56cafb0dc16
 
 == Service Discovery
 
+[.notes]
+--
+* In fact, it's a dynamic system
+* Not as fast as the cloud or K8S, but it has moving parts
+--
+
 --
 * There is no API describing the the current known POS devices
 ** _This is the real world - no cloud native features available_
@@ -72,11 +105,32 @@ image::https://image.jimcdn.com/app/cms/image/transf/none/path/s7bf4e56cafb0dc16
 --
 
 [WARNING,step=2]
-How does Prometheus know which POS systems are currently active? +
-*Excel and manual adjustments in files are not an option!*
+How does Prometheus know which POS systems are currently active?
 
+[background-color="#a81326"]
+== We need an inventory!
+
+[.notes]
+--
+* What is online
+* What is broken
+* Reduce false alerts
+* Where are devices located
+* How should be paged in case of an error
+--
 
 == Introducing Netbox
+
+[.notes]
+--
+* The Answer is Netbox! 
+* **Survey: Who knows Netbox?**
+
+* Developed at Digital Ocean
+* Currently supported by NS1.
+* No more Excel sheets
+* Structured data about the network and devices
+--
 
 image:https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg[width=150]
 
@@ -90,6 +144,17 @@ image:https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/net
 NetBox provides the "source of truth" to power automation
 
 == Connecting Netbox with Prometheus
+
+[.notes]
+--
+* We want to have a cloud native feeling for real world infrastructure
+* Excel and manual adjustments in files are not an option!
+* Labels for routing and alerts
+--
+
+* Goal: Dynamic configuration of Prometheus targets via Netbox
+* Bonus: Apply Netbox content to Prometheus labels
+
 
 [WARNING, step=1]
 There is no native integration of Netbox and Prometheus
