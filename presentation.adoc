@@ -12,6 +12,7 @@ with Prometheus and Netbox
 :revealjs_history: true
 :icons: font
 :revealjs_totalTime: 900
+:source-highlighter: highlight.js
 
 == Felix Peters
 
@@ -163,7 +164,7 @@ There is no native integration of Netbox and Prometheus
 __but we have some options...__
 
 
-== `static_config`
+== `file_sd_configs`
 
 [.notes]
 --
@@ -173,6 +174,33 @@ __but we have some options...__
 
 __The classic approach__
 
+``` bash
+NETBOX_SD_URL: https://netboxdemo.com
+NETBOX_SD_TOKEN:  72830d67beff4ae178b94d8f781842408df8069d
+NETBOX_FILTER: "{\"status\":\"active\",\"site\":\"ds9\"}"
+NETBOX_SD_FILE_PATH: /data/netbox/netbox.json
+NETBOX_SD_LOG_LEVEL: "DEBUG"
+NETBOX_SD_VERIFY_SSL: "FALSE"
+NETBOX_THREADING: "True"
+NETBOX_SD_LOOP_DELAY: "60"
+NETBOX_SD_METRICS_PORT: "8000"
+NETBOX_OBJECTS: "vm device"
+```
+
+``` bash
+python3 netbox-prometheus-sd.py
+```
+
+``` yaml
+- job_name: 'netbox'
+  file_sd_configs:
+  - files:
+    - '/path/to/my/output.json'
+```
+
+
+== `file_sd_configs` conclusion
+
 * 👍 Easy to implement as a sidecar
 * 👍 No adjustments on Netbox
 
@@ -180,10 +208,36 @@ __The classic approach__
 * 👎 Requires multiple API calls for each device
 * 👎 Requires additional monitoring of the sidecar
 
+
 [step=1]
 https://github.com/FlxPeters/netbox-prometheus-sd
 
 == `http_sd`
+
+__Fetch targets dynamically via HTTP__
+
+https://prometheus.io/docs/prometheus/latest/http_sd/#comparison-between-file-based-sd-and-http-sd[Introduced] in Prometheus 2.28.0 as alternative to `static_config`
+
+
+[source,yaml,linenums,highlight=4]
+----
+scrape_configs:
+  - job_name: "http_sd_ips"
+    http_sd_configs:
+      - url: http://netbox:8080/api/plugins/prometheus-sd/ip-addresses?status=active
+        refresh_interval: 15s
+        authorization:
+          type: "Token"
+          credentials: "0123456789abcdef0123456789abcdef01234567"
+      - url: http://netbox:8080/api/plugins/prometheus-sd/virtual-machines/
+        refresh_interval: 15s
+        authorization:
+          type: "Token"
+          credentials: "0123456789abcdef0123456789abcdef01234567"
+----
+
+
+== `http_sd` conclusion
 
 [.notes]
 --
@@ -191,10 +245,6 @@ https://github.com/FlxPeters/netbox-prometheus-sd
 * Move the knowledge back to the source
 * Just a new view on the Netbox API
 --
-
-__Fetch targets dynamically via HTTP__
-
-https://prometheus.io/docs/prometheus/latest/http_sd/#comparison-between-file-based-sd-and-http-sd[Introduced] in Prometheus 2.28.0 as alternative to `static_config`
 
 * 👍 No sidecar on Prometheus
 * 👍 Full power of the Netbox API (filters etc.)
