@@ -124,8 +124,11 @@ How does Prometheus know which POS systems are currently active?
 
 [.notes]
 --
+
 * The Answer is Netbox! 
 * **Survey: Who knows Netbox?**
+
+* https://demo.netbox.dev/
 
 * Developed at Digital Ocean
 * Currently supported by NS1.
@@ -151,6 +154,7 @@ NetBox provides the "source of truth" to power automation
 * We want to have a cloud native feeling for real world infrastructure
 * Excel and manual adjustments in files are not an option!
 * Labels for routing and alerts
+
 --
 
 * Goal: Dynamic configuration of Prometheus targets via Netbox
@@ -175,19 +179,18 @@ __but we have some options...__
 __The classic approach__
 
 ``` bash
+# Export all the config
 NETBOX_SD_URL: https://netboxdemo.com
-NETBOX_SD_TOKEN:  72830d67beff4ae178b94d8f781842408df8069d
+NETBOX_SD_TOKEN:  token
 NETBOX_FILTER: "{\"status\":\"active\",\"site\":\"ds9\"}"
 NETBOX_SD_FILE_PATH: /data/netbox/netbox.json
-NETBOX_SD_LOG_LEVEL: "DEBUG"
 NETBOX_SD_VERIFY_SSL: "FALSE"
 NETBOX_THREADING: "True"
 NETBOX_SD_LOOP_DELAY: "60"
 NETBOX_SD_METRICS_PORT: "8000"
 NETBOX_OBJECTS: "vm device"
-```
 
-``` bash
+# Run a sidecar
 python3 netbox-prometheus-sd.py
 ```
 
@@ -212,11 +215,16 @@ python3 netbox-prometheus-sd.py
 [step=1]
 https://github.com/FlxPeters/netbox-prometheus-sd
 
+[%notitle]
+== Tweet
+
+image::images/tweet.png[]
+
 == `http_sd`
 
 __Fetch targets dynamically via HTTP__
 
-https://prometheus.io/docs/prometheus/latest/http_sd/#comparison-between-file-based-sd-and-http-sd[Introduced] in Prometheus 2.28.0 as alternative to `static_config`
+https://prometheus.io/docs/prometheus/latest/http_sd/#comparison-between-file-based-sd-and-http-sd[Introduced] in Prometheus 2.28.0
 
 
 [source,yaml,linenums,highlight=4]

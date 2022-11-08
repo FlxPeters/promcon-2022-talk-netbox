@@ -432,7 +432,7 @@ and other peripherals such as card terminals and receipt printers.</p></div></as
 <div class="openblock"><div class="content"><div class="ulist"><ul><li><p>There is no API describing the the current known POS devices</p><div class="ulist"><ul><li><p><em>This is the real world - no cloud native features available</em></p></li></ul></div></li><li><p>POS devices are no static deployment</p><div class="ulist"><ul><li><p><em>They can be out of service for maintenance</em></p></li><li><p><em>There are systems that are only active when required</em></p></li></ul></div></li></ul></div></div></div>
 <div class="admonitionblock warning fragment" data-fragment-index="2"><table><tr><td class="icon"><i class="fa fa-warning" title="Warning"></i></td><td class="content">How does Prometheus know which POS systems are currently active?</td></tr></table></div></div></section>
 <section id="_we_need_an_inventory" data-background-color="#a81326"><h2>We need an inventory!</h2><div class="slide-content"><aside class="notes"><div class="ulist"><ul><li><p>What is online</p></li><li><p>What is broken</p></li><li><p>Reduce false alerts</p></li><li><p>Where are devices located</p></li><li><p>How should be paged in case of an error</p></li></ul></div></aside></div></section>
-<section id="_introducing_netbox"><h2>Introducing Netbox</h2><div class="slide-content"><aside class="notes"><div class="ulist"><ul><li><p>The Answer is Netbox!</p></li><li><p><strong>Survey: Who knows Netbox?</strong></p></li><li><p>Developed at Digital Ocean</p></li><li><p>Currently supported by NS1.</p></li><li><p>No more Excel sheets</p></li><li><p>Structured data about the network and devices</p></li></ul></div></aside>
+<section id="_introducing_netbox"><h2>Introducing Netbox</h2><div class="slide-content"><aside class="notes"><div class="ulist"><ul><li><p>The Answer is Netbox!</p></li><li><p><strong>Survey: Who knows Netbox?</strong></p></li><li><p><a href="https://demo.netbox.dev/" class="bare">https://demo.netbox.dev/</a></p></li><li><p>Developed at Digital Ocean</p></li><li><p>Currently supported by NS1.</p></li><li><p>No more Excel sheets</p></li><li><p>Structured data about the network and devices</p></li></ul></div></aside>
 <div class="paragraph"><p><span class="image"><img src="https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg" alt="netbox logo" width="150"></span></p></div>
 <div class="openblock"><div class="content"><div class="ulist"><ul><li><p>Python based web application for IP address management <strong>(IPAM)</strong> and Datacenter infrastructure management <strong>(DCIM)</strong></p></li><li><p>Capable of managing <strong>devices</strong> and <strong>virtual machine&#8217;s life cycle</strong>.</p></li><li><p>Powerful <strong>APIs</strong> and <strong>extensions</strong></p></li></ul></div></div></div>
 <div class="admonitionblock caution fragment" data-fragment-index="1"><table><tr><td class="icon"><i class="fa fa-fire" title="Caution"></i></td><td class="content">NetBox provides the "source of truth" to power automation</td></tr></table></div></div></section>
@@ -442,25 +442,28 @@ and other peripherals such as card terminals and receipt printers.</p></div></as
 <div class="paragraph fragment" data-fragment-index="1"><p><em>but we have some options&#8230;&#8203;</em></p></div></div></section>
 <section id="_file_sd_configs"><h2><code>file_sd_configs</code></h2><div class="slide-content"><aside class="notes"><div class="ulist"><ul><li><p>Classic approach for third party SD</p></li><li><p>Scrape targets periodically and dump them to a file</p></li></ul></div></aside>
 <div class="paragraph"><p><em>The classic approach</em></p></div>
-<div class="listingblock"><div class="content"><pre class="highlight"><code class="language-bash" data-lang="bash">NETBOX_SD_URL: https://netboxdemo.com
-NETBOX_SD_TOKEN:  72830d67beff4ae178b94d8f781842408df8069d
+<div class="listingblock"><div class="content"><pre class="highlight"><code class="language-bash" data-lang="bash"># Export all the config
+NETBOX_SD_URL: https://netboxdemo.com
+NETBOX_SD_TOKEN:  token
 NETBOX_FILTER: "{\"status\":\"active\",\"site\":\"ds9\"}"
 NETBOX_SD_FILE_PATH: /data/netbox/netbox.json
-NETBOX_SD_LOG_LEVEL: "DEBUG"
 NETBOX_SD_VERIFY_SSL: "FALSE"
 NETBOX_THREADING: "True"
 NETBOX_SD_LOOP_DELAY: "60"
 NETBOX_SD_METRICS_PORT: "8000"
-NETBOX_OBJECTS: "vm device"</code></pre></div></div>
-<div class="listingblock"><div class="content"><pre class="highlight"><code class="language-bash" data-lang="bash">python3 netbox-prometheus-sd.py</code></pre></div></div>
+NETBOX_OBJECTS: "vm device"
+
+# Run a sidecar
+python3 netbox-prometheus-sd.py</code></pre></div></div>
 <div class="listingblock"><div class="content"><pre class="highlight"><code class="language-yaml" data-lang="yaml">- job_name: 'netbox'
   file_sd_configs:
   - files:
     - '/path/to/my/output.json'</code></pre></div></div></div></section>
 <section id="_file_sd_configs_conclusion"><h2><code>file_sd_configs</code> conclusion</h2><div class="slide-content"><div class="ulist"><ul><li><p>👍 Easy to implement as a sidecar</p></li><li><p>👍 No adjustments on Netbox</p></li><li><p>👎 New component on each Prometheus</p></li><li><p>👎 Requires multiple API calls for each device</p></li><li><p>👎 Requires additional monitoring of the sidecar</p></li></ul></div>
 <div class="paragraph fragment" data-fragment-index="1"><p><a href="https://github.com/FlxPeters/netbox-prometheus-sd" class="bare">https://github.com/FlxPeters/netbox-prometheus-sd</a></p></div></div></section>
+<section id="_tweet"><div class="slide-content"><div class="imageblock"><img src="images/tweet.png" alt="tweet"></div></div></section>
 <section id="_http_sd"><h2><code>http_sd</code></h2><div class="slide-content"><div class="paragraph"><p><em>Fetch targets dynamically via HTTP</em></p></div>
-<div class="paragraph"><p><a href="https://prometheus.io/docs/prometheus/latest/http_sd/#comparison-between-file-based-sd-and-http-sd">Introduced</a> in Prometheus 2.28.0 as alternative to <code>static_config</code></p></div>
+<div class="paragraph"><p><a href="https://prometheus.io/docs/prometheus/latest/http_sd/#comparison-between-file-based-sd-and-http-sd">Introduced</a> in Prometheus 2.28.0</p></div>
 <div class="listingblock"><div class="content"><pre class="highlight"><code class="language-yaml" data-lang="yaml">scrape_configs:
   - job_name: "http_sd_ips"
     http_sd_configs:
