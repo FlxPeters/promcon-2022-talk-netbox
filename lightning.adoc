@@ -1,0 +1,41 @@
+= Exporters with Powershell
+
+== WHY?
+
+[step=1]
+> Because we can!
+
+[step=2]
+> Because sometimes it's just a good fit
+
+== Getting started
+
+https://github.com/jobec/powershell-prom-client
+
+[source]
+----
+$ Install-Module -Name PrometheusExporter
+----
+
+== Example
+
+
+
+== Running as a service
+
+Wrap the Powershell as Service with NSSM.
+
+[source]
+----
+$serviceName = 'MyExporter'
+$nssm = "c:\path\to\nssm.exe"
+$powershell = (Get-Command powershell).Source
+$scriptPath = 'c:\program files\your_exporter\exporter.ps1'
+$arguments = '-ExecutionPolicy Bypass -NoProfile -File """{0}"""' -f $scriptPath
+
+& $nssm install $serviceName $powershell $arguments
+Start-Service $serviceName
+
+# Substitute the port below with the one you picked for your exporter
+New-NetFirewallRule -DisplayName "My Exporter" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 9700
+----
